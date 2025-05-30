@@ -57,7 +57,10 @@ const TodoList: React.FC<TodoListPropsType> = ({
           onChange={onChangeTaskStatusHandler}
           checked={t.isDone}
         />
-        <EditableSpan oldTitle={t.title} onClickAdd={updateTaskHandler} />
+        <EditableSpan
+          oldTitle={t.title}
+          onClickAdd={(newTitle: string) => updateTaskHandler(t.id, newTitle)}
+        />
         <button onClick={() => removeTask(todoListId, t.id)}>x</button>
       </li>
     );

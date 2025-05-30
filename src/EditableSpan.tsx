@@ -3,7 +3,7 @@ import "./App.css";
 
 type EditableSpanPropsType = {
   oldTitle: string;
-  onClickAdd: (title: string) => void;
+  onClickAdd: (newTitle: string) => void;
 };
 
 export const EditableSpan: React.FC<EditableSpanPropsType> = ({
