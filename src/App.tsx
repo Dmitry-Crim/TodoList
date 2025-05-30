@@ -1,60 +1,152 @@
-import { useState } from 'react';
-import './App.css';
-import TodoList, { type TaskType } from './TodoList';
+import { useState } from "react";
+import "./App.css";
+import TodoList from "./TodoList";
+import { AddItemForm } from "./AddItemForm";
 
+export type FilterValuesType = "all" | "active" | "completed";
+
+type TodoListType = {
+  id: string;
+  title: string;
+  filter: FilterValuesType;
+};
+
+export type TaskType = {
+  id: string;
+  title: string;
+  isDone: boolean;
+};
 
 function App() {
+  let todolistID1: string = crypto.randomUUID();
+  let todolistID2: string = crypto.randomUUID();
 
-  const todoListTitle_1: string = "What to learn";    
-  // const todoListTitle_2: string = "What to buy";
+  let [todoLists, setTodoList] = useState<TodoListType[]>([
+    { id: todolistID1, title: "What to leaarn", filter: "all" },
+    { id: todolistID2, title: "What to buy", filter: "all" },
+  ]);
 
-  const [tasks, setTasks] = useState<Array<TaskType>>([ 
-    {id: 1, isDone: true, title: 'HTML&CSS'},
-    {id: 2, isDone: true, title: 'JS&TS'},
-    {id: 3, isDone: false, title: 'React'},
-    {id: 4, isDone: true, title: 'REDUX'},
-  ])
+  let [tasks, setTasks] = useState({
+    [todolistID1]: [
+      { id: crypto.randomUUID(), title: "HTML&CSS", isDone: true },
+      { id: crypto.randomUUID(), title: "JS", isDone: false },
+      { id: crypto.randomUUID(), title: "ReactJS", isDone: true },
+      { id: crypto.randomUUID(), title: "Rest API", isDone: false },
+      { id: crypto.randomUUID(), title: "GraphQL", isDone: true },
+    ],
+    [todolistID2]: [
+      { id: crypto.randomUUID(), title: "Яблоки", isDone: false },
+      { id: crypto.randomUUID(), title: "Груши", isDone: true },
+      { id: crypto.randomUUID(), title: "Клубника", isDone: false },
+      { id: crypto.randomUUID(), title: "Мандарины", isDone: true },
+      { id: crypto.randomUUID(), title: "Апельсины", isDone: false },
+    ],
+  });
 
-  console.log(tasks)
-  const removeTask = (taskId: number) => {
-    const nextState: Array<TaskType> = []
-    for (let i = 0; i < tasks.length; i++) {
-      if (tasks[i].id !== taskId) {
-        nextState.push(tasks[i])
-      }
-    }
-    console.log(nextState)
-    setTasks(nextState)
-  }
+  // Функции, изменяющие состояние tasks
+  //
+  const removeTask = (todoListId: string, taskId: string) => {
+    setTasks({
+      ...tasks,
+      [todoListId]: tasks[todoListId].filter((el) => el.id !== taskId),
+    });
+  };
 
-  // const tasks_1: Array<TaskType> = [
-  //   {id: 1, isDone: true, title: 'HTML&CSS'},
-  //   {id: 2, isDone: true, title: 'JS&TS'},
-  //   {id: 3, isDone: false, title: 'React'},
-  //   {id: 4, isDone: true, title: 'REDUX'},
-  // ]
+  const changeTaskStatus = (
+    todoListId: string,
+    taskId: string,
+    isDone: boolean
+  ) => {
+    setTasks({
+      ...tasks,
+      [todoListId]: tasks[todoListId].map((el) =>
+        el.id === taskId ? { ...el, isDone: isDone } : el
+      ),
+    });
+  };
 
-  // const tasks_2: Array<TaskType> = [          
-  //   {id: 5, isDone: false, title: 'Bread'},
-  //   {id: 6, isDone: false, title: 'Chocolater'},
-  //   {id: 7, isDone: true, title: 'Tea'},
-  //   {id: 8, isDone: false, title: 'Coffee'},
-  // ]
+  // Функции, изменяющие состояние todoList
+  // Функция для удаления TodoList
+  const removeTodoList = (todoListId: string) => {
+    setTodoList(todoLists.filter((el) => el.id !== todoListId));
+    delete tasks[todoListId]; // удаляем ненужное (временное решение)
+  };
+
+  // Фукция, изменяющая значение свойства filter
+  const changeFilter = (todoListId: string, value: FilterValuesType) => {
+    setTodoList(
+      todoLists.map((el) =>
+        el.id === todoListId ? { ...el, filter: value } : el
+      )
+    );
+  };
+
+  // Функция, добавляющая новый task
+  const addTask = (todoListId: string, title: string) => {
+    let newTask = { id: crypto.randomUUID(), title: title, isDone: false };
+    setTasks({
+      ...tasks,
+      [todoListId]: [...tasks[todoListId], newTask],
+    });
+  };
+
+  // Функция, создает новый TodoList
+  const addTodoList = (title: string) => {
+    const newId = crypto.randomUUID();
+    const newTodo: TodoListType = {
+      id: newId,
+      title,
+      filter: "all",
+    };
+    setTodoList([...todoLists, newTodo]);
+    setTasks({
+      ...tasks,
+      [newId]: [],
+    });
+  };
+
+  const updateTask = (todoListId: string, taskId: string, newTitle: string) => {
+    setTasks({
+      ...tasks,
+      [todoListId]: tasks[todoListId].map((el) =>
+        el.id === taskId ? { ...el, title: newTitle } : el
+      ),
+    });
+  };
+
+  const updateTodoList = (todoListId: string, newTitle: string) => {
+    setTodoList(
+      todoLists.map((el) =>
+        el.id === todoListId ? { ...el, title: newTitle } : el
+      )
+    );
+  };
+
+  // Отрисовка App
 
   return (
     <div className="App">
-      <TodoList 
-        tasks = {tasks}   
-        title = {todoListTitle_1}
-        removeTask={removeTask}
-        />
-      {/* <TodoList 
-        tasks = {tasks_2}
-        title = {todoListTitle_2}
-        removeTask={removeTask}
-        />       */}
-    </div>      
-  )
-}  
+      <AddItemForm onClickAdd={addTodoList} />
+      {todoLists.map((el) => {
+        return (
+          <TodoList
+            key={el.id}
+            todoListId={el.id}
+            tasks={tasks[el.id]}
+            title={el.title}
+            filter={el.filter}
+            removeTask={removeTask}
+            changeFilter={changeFilter}
+            addTask={addTask}
+            changeTaskStatus={changeTaskStatus}
+            removeTodoList={removeTodoList}
+            updateTask={updateTask}
+            updateTodoList={updateTodoList}
+          />
+        );
+      })}
+    </div>
+  );
+}
 
 export default App;

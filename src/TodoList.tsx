@@ -1,76 +1,117 @@
-import React, { type JSX } from "react";
+import React, { type ChangeEvent, type JSX } from "react";
+import type { FilterValuesType, TaskType } from "./App";
+import { AddItemForm } from "./AddItemForm";
+import { EditableSpan } from "./EditableSpan";
 
 type TodoListPropsType = {
-    title: string
-    tasks: Array<TaskType>
-    removeTask: (taskId: number) => void
-}
+  todoListId: string;
+  title: string;
+  tasks: Array<TaskType>;
+  filter: FilterValuesType;
+  removeTask: (todoListId: string, taskId: string) => void;
+  changeFilter: (todoListId: string, value: FilterValuesType) => void;
+  addTask: (todoListId: string, title: string) => void;
+  changeTaskStatus: (
+    todoListId: string,
+    taskId: string,
+    newIsDoneValue: boolean
+  ) => void;
+  removeTodoList: (todoListId: string) => void;
+  updateTask: (todoListId: string, taskId: string, newTitle: string) => void;
+  updateTodoList: (todoListId: string, newTitle: string) => void;
+};
 
-export type TaskType = {
-    id: number,
-    title: string,
-    isDone: boolean
+const TodoList: React.FC<TodoListPropsType> = ({
+  todoListId,
+  title,
+  tasks,
+  filter,
+  removeTask,
+  changeFilter,
+  addTask,
+  changeTaskStatus,
+  removeTodoList,
+  updateTask,
+  updateTodoList,
+}) => {
+  let tasksFiltred = tasks;
+  if (filter === "active") {
+    tasksFiltred = tasks.filter((t) => t.isDone === false);
+  }
+  if (filter === "completed") {
+    tasksFiltred = tasks.filter((t) => t.isDone === true);
   }
 
-const TodoList: React.FC<TodoListPropsType> = (props: TodoListPropsType) => { 
+  const updateTaskHandler = (tId: string, newTitle: string) => {
+    updateTask(todoListId, tId, newTitle);
+  };
 
-// const TodoList: React.FC<TodoListPropsType> = ({title, tasks, removeTask}) => {  
-// функциональная компонента, функция возвращает JSX разметку
-
-    const {title, tasks, removeTask} = props; 
-
-    // одноименным переменным присваиваются одноименные ключи объекта
-    // const title = props.title;   
-    // const tasks = props.tasks;
-
-    // const listItems: Array<JSX.Element> = [];    
-    // let tasksList: Array<JSX.Element> | JSX.Element;
-    // if (tasks.length === 0) {
-    //     tasksList = <span>Your taskList is empty</span>
-    // } else {
-    //     for (let i = 0; i < tasks.length; i++) {
-    //         const newListItems = <li key = {tasks[i].id}>
-    //             <input type="checkbox" checked={tasks[i].isDone} /> <span>{tasks[i].title}</span>
-    //             <button>x</button> 
-    //         </li>
-    //         listItems.push(newListItems)
-    //     }   
-    //     tasksList = <ul>
-    //         {listItems}
-    //     </ul>     
-    // }
-
-    const listItems: Array<JSX.Element> = tasks.map(t => {
-        
-        const onClickRemoveTaskHandler = () => removeTask(t.id)
-        return (
-            <li key = {t.id}>
-                <input type="checkbox" checked={t.isDone} />
-                <span>{t.title}</span>
-                <button onClick={onClickRemoveTaskHandler}>x</button>
-            </li>
-        )
-    })
-    
-    const tasksList: JSX.Element = tasks.length      
-        ? <ul>{listItems}</ul>
-        : <span>Your taskList is empty</span>
+  const listItems: Array<JSX.Element> = tasksFiltred.map((t) => {
+    const onChangeTaskStatusHandler = (event: ChangeEvent<HTMLInputElement>) =>
+      changeTaskStatus(todoListId, t.id, event.currentTarget.checked);
 
     return (
-        <div className='todoList'>
-            <h3>{title}</h3>
-            <div>
-                <input/>
-                <button>+</button>
-            </div>
-                {tasksList}  
-            <div>
-                <button>All</button>
-                <button>Active</button>
-                <button>Completed</button>
-            </div>
-      </div>      
-    )
-}
+      <li key={t.id}>
+        <input
+          type="checkbox"
+          onChange={onChangeTaskStatusHandler}
+          checked={t.isDone}
+        />
+        <EditableSpan oldTitle={t.title} onClickAdd={updateTaskHandler} />
+        <button onClick={() => removeTask(todoListId, t.id)}>x</button>
+      </li>
+    );
+  });
 
-export default TodoList;  // разрешили использовать TodoList во внешнем мире
+  const tasksList: JSX.Element = tasksFiltred.length ? (
+    <ul>{listItems}</ul>
+  ) : (
+    <span>Your taskList is empty</span>
+  );
+
+  // Функция принимает title и запускает функцию addTask, переданную из App.tsx,
+  // которая добаляет новый task в указанном todoListID
+  // Эту функцию мы передаем в AddItemForm
+  const addTaskHandler = (title: string) => {
+    addTask(todoListId, title);
+  };
+
+  const updateTodoListHandler = (newTitle: string) => {
+    updateTodoList(todoListId, newTitle);
+  };
+
+  // Отрисовка TodoList
+  const removeTodoListHandler = () => removeTodoList(todoListId);
+  return (
+    <div className="todoList">
+      <h3>
+        <EditableSpan oldTitle={title} onClickAdd={updateTodoListHandler} />
+        <button onClick={removeTodoListHandler}>x</button>
+      </h3>
+      <AddItemForm onClickAdd={addTaskHandler} />
+      {tasksList}
+      <div>
+        <button
+          className={filter === "all" ? "btn-active" : undefined}
+          onClick={() => changeFilter(todoListId, "all")}
+        >
+          All
+        </button>
+        <button
+          className={filter === "active" ? "btn-active" : undefined}
+          onClick={() => changeFilter(todoListId, "active")}
+        >
+          Active
+        </button>
+        <button
+          className={filter === "completed" ? "btn-active" : undefined}
+          onClick={() => changeFilter(todoListId, "completed")}
+        >
+          Completed
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default TodoList;
