@@ -2,6 +2,10 @@ import { useState } from "react";
 import "./App.css";
 import TodoList from "./TodoList";
 import { AddItemForm } from "./AddItemForm";
+import ButtonAppBar from "./ButtonAppBar";
+import { Container } from "@mui/material";
+import Grid from "@mui/material/Grid";
+import Paper from "@mui/material/Paper";
 
 export type FilterValuesType = "all" | "active" | "completed";
 
@@ -126,25 +130,42 @@ function App() {
 
   return (
     <div className="App">
-      <AddItemForm onClickAdd={addTodoList} />
-      {todoLists.map((el) => {
-        return (
-          <TodoList
-            key={el.id}
-            todoListId={el.id}
-            tasks={tasks[el.id]}
-            title={el.title}
-            filter={el.filter}
-            removeTask={removeTask}
-            changeFilter={changeFilter}
-            addTask={addTask}
-            changeTaskStatus={changeTaskStatus}
-            removeTodoList={removeTodoList}
-            updateTask={updateTask}
-            updateTodoList={updateTodoList}
-          />
-        );
-      })}
+      <ButtonAppBar />
+      <Container fixed>
+        <Grid container style={{ marginTop: "10px" }}>
+          <AddItemForm onClickAdd={addTodoList} />
+        </Grid>
+        <Grid container style={{}}>
+          {todoLists.map((el) => {
+            return (
+              <Paper
+                elevation={3}
+                style={{
+                  padding: "20px",
+                  marginTop: "10px",
+                  marginRight: "10px",
+                  backgroundColor: "aqua",
+                }}
+              >
+                <TodoList
+                  key={el.id}
+                  todoListId={el.id}
+                  tasks={tasks[el.id]}
+                  title={el.title}
+                  filter={el.filter}
+                  removeTask={removeTask}
+                  changeFilter={changeFilter}
+                  addTask={addTask}
+                  changeTaskStatus={changeTaskStatus}
+                  removeTodoList={removeTodoList}
+                  updateTask={updateTask}
+                  updateTodoList={updateTodoList}
+                />
+              </Paper>
+            );
+          })}
+        </Grid>
+      </Container>
     </div>
   );
 }

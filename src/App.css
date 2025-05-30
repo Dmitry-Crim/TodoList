@@ -1,11 +1,11 @@
-.App {
+/* .App {
   padding: 30px;
-  display: flex;
-  background-color: aliceblue;
-  height: 100vh;
+   display: flex; 
+   background-color: aliceblue;
+  height: 100vh; 
 }
 
-.App > div {
+ .App > div {
   margin-right: 50px;
 }
 
@@ -34,4 +34,4 @@
 
 .inputError {
   border: 2px solid red;
-}
+}  */
