@@ -1,14 +1,37 @@
-import { useState } from "react";
+import { useReducer } from "react";
 import "./App.css";
-import TodoList from "./TodoList";
-import { AddItemForm } from "./AddItemForm";
+import TodoList from "./components/TodoList";
+import { AddItemForm } from "./components/AddItemForm";
+import ButtonAppBar from "./components/ButtonAppBar";
+import { Container } from "@mui/material";
+import Grid from "@mui/material/Grid";
+import Paper from "@mui/material/Paper";
+import {
+  tasksReducer,
+  addTaskAC,
+  changeTaskStatusAC,
+  removeTaskAC,
+  updateTaskAC,
+  addTodoListTasksAC,
+} from "./reducers/tasksReducer";
+import {
+  todoListReducer,
+  removeTodoListAC,
+  updateTodoListAC,
+  changeFilterAC,
+  addTodoListAC,
+} from "./reducers/todoListReducer";
 
 export type FilterValuesType = "all" | "active" | "completed";
 
-type TodoListType = {
+export type TodoListType = {
   id: string;
   title: string;
   filter: FilterValuesType;
+};
+
+export type TasksType = {
+  [key: string]: Array<TaskType>;
 };
 
 export type TaskType = {
@@ -21,12 +44,19 @@ function App() {
   let todolistID1: string = crypto.randomUUID();
   let todolistID2: string = crypto.randomUUID();
 
-  let [todoLists, setTodoList] = useState<TodoListType[]>([
+  // useReducer - React-хук для управления состояниями компонента
+  // todoListReducer - функция, описывающая, как изменяются состояния
+  // в ответ на определенные действия
+  // todoLists - текущее состояние
+  // dispatchTodoList - функция, отправляющая действие (action) редуктору
+  // и изменить состояние
+
+  let [todoLists, dispatchTodoList] = useReducer(todoListReducer, [
     { id: todolistID1, title: "What to leaarn", filter: "all" },
     { id: todolistID2, title: "What to buy", filter: "all" },
   ]);
 
-  let [tasks, setTasks] = useState({
+  const [tasks, dispatchTasks] = useReducer(tasksReducer, {
     [todolistID1]: [
       { id: crypto.randomUUID(), title: "HTML&CSS", isDone: true },
       { id: crypto.randomUUID(), title: "JS", isDone: false },
@@ -43,13 +73,12 @@ function App() {
     ],
   });
 
-  // Функции, изменяющие состояние tasks
-  //
   const removeTask = (todoListId: string, taskId: string) => {
-    setTasks({
-      ...tasks,
-      [todoListId]: tasks[todoListId].filter((el) => el.id !== taskId),
-    });
+    dispatchTasks(removeTaskAC(todoListId, taskId));
+  };
+
+  const addTask = (todoListId: string, title: string) => {
+    dispatchTasks(addTaskAC(todoListId, title));
   };
 
   const changeTaskStatus = (
@@ -57,94 +86,73 @@ function App() {
     taskId: string,
     isDone: boolean
   ) => {
-    setTasks({
-      ...tasks,
-      [todoListId]: tasks[todoListId].map((el) =>
-        el.id === taskId ? { ...el, isDone: isDone } : el
-      ),
-    });
-  };
-
-  // Функции, изменяющие состояние todoList
-  // Функция для удаления TodoList
-  const removeTodoList = (todoListId: string) => {
-    setTodoList(todoLists.filter((el) => el.id !== todoListId));
-    delete tasks[todoListId]; // удаляем ненужное (временное решение)
-  };
-
-  // Фукция, изменяющая значение свойства filter
-  const changeFilter = (todoListId: string, value: FilterValuesType) => {
-    setTodoList(
-      todoLists.map((el) =>
-        el.id === todoListId ? { ...el, filter: value } : el
-      )
-    );
-  };
-
-  // Функция, добавляющая новый task
-  const addTask = (todoListId: string, title: string) => {
-    let newTask = { id: crypto.randomUUID(), title: title, isDone: false };
-    setTasks({
-      ...tasks,
-      [todoListId]: [...tasks[todoListId], newTask],
-    });
-  };
-
-  // Функция, создает новый TodoList
-  const addTodoList = (title: string) => {
-    const newId = crypto.randomUUID();
-    const newTodo: TodoListType = {
-      id: newId,
-      title,
-      filter: "all",
-    };
-    setTodoList([...todoLists, newTodo]);
-    setTasks({
-      ...tasks,
-      [newId]: [],
-    });
+    dispatchTasks(changeTaskStatusAC(todoListId, taskId, isDone));
   };
 
   const updateTask = (todoListId: string, taskId: string, newTitle: string) => {
-    setTasks({
-      ...tasks,
-      [todoListId]: tasks[todoListId].map((el) =>
-        el.id === taskId ? { ...el, title: newTitle } : el
-      ),
-    });
+    dispatchTasks(updateTaskAC(todoListId, taskId, newTitle));
+  };
+
+  // Функции, изменяющие состояние todoList
+  const removeTodoList = (todoListId: string) => {
+    dispatchTodoList(removeTodoListAC(todoListId));
+    delete tasks[todoListId]; // удаляем ненужное (временное решение)
+  };
+
+  const changeFilter = (todoListId: string, value: FilterValuesType) => {
+    dispatchTodoList(changeFilterAC(todoListId, value));
   };
 
   const updateTodoList = (todoListId: string, newTitle: string) => {
-    setTodoList(
-      todoLists.map((el) =>
-        el.id === todoListId ? { ...el, title: newTitle } : el
-      )
-    );
+    dispatchTodoList(updateTodoListAC(todoListId, newTitle));
+  };
+
+  const addTodoList = (title: string) => {
+    const newTodolistId = crypto.randomUUID();
+    dispatchTodoList(addTodoListAC(title, newTodolistId));
+    dispatchTasks(addTodoListTasksAC(newTodolistId));
   };
 
   // Отрисовка App
 
   return (
     <div className="App">
-      <AddItemForm onClickAdd={addTodoList} />
-      {todoLists.map((el) => {
-        return (
-          <TodoList
-            key={el.id}
-            todoListId={el.id}
-            tasks={tasks[el.id]}
-            title={el.title}
-            filter={el.filter}
-            removeTask={removeTask}
-            changeFilter={changeFilter}
-            addTask={addTask}
-            changeTaskStatus={changeTaskStatus}
-            removeTodoList={removeTodoList}
-            updateTask={updateTask}
-            updateTodoList={updateTodoList}
-          />
-        );
-      })}
+      <ButtonAppBar />
+      <Container fixed>
+        <Grid container style={{ marginTop: "10px" }}>
+          <AddItemForm onClickAdd={addTodoList} />
+        </Grid>
+        <Grid container style={{}}>
+          {todoLists.map((el) => {
+            return (
+              <Paper
+                elevation={3}
+                style={{
+                  padding: "20px",
+                  marginTop: "10px",
+                  marginRight: "10px",
+                  backgroundColor: "aqua",
+                }}
+              >
+                <TodoList
+                  key={el.id}
+                  todoListId={el.id}
+                  tasks={tasks[el.id]}
+                  title={el.title}
+                  filter={el.filter}
+                  removeTask={removeTask}
+                  changeFilter={changeFilter}
+                  addTask={addTask}
+                  changeTaskStatus={changeTaskStatus}
+                  removeTodoList={removeTodoList}
+                  updateTask={updateTask}
+                  updateTodoList={updateTodoList}
+                />
+              </Paper>
+            );
+          })}
+        </Grid>
+      </Container>
     </div>
   );
 }

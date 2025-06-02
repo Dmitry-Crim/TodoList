@@ -1,7 +1,11 @@
-import React, { type ChangeEvent, type JSX } from "react";
-import type { FilterValuesType, TaskType } from "./App";
+import React, { type JSX } from "react";
+import type { FilterValuesType, TaskType } from "../App";
 import { AddItemForm } from "./AddItemForm";
 import { EditableSpan } from "./EditableSpan";
+import { SuperCheckbox } from "./SuperCheckbox";
+import IconButton from "@mui/material/IconButton";
+import DeleteIcon from "@mui/icons-material/Delete";
+import Button from "@mui/material/Button";
 
 type TodoListPropsType = {
   todoListId: string;
@@ -46,22 +50,26 @@ const TodoList: React.FC<TodoListPropsType> = ({
     updateTask(todoListId, tId, newTitle);
   };
 
-  const listItems: Array<JSX.Element> = tasksFiltred.map((t) => {
-    const onChangeTaskStatusHandler = (event: ChangeEvent<HTMLInputElement>) =>
-      changeTaskStatus(todoListId, t.id, event.currentTarget.checked);
+  const onChangeTaskStatusHandler = (tId: string, isDone: boolean) =>
+    changeTaskStatus(todoListId, tId, isDone);
 
+  const listItems: Array<JSX.Element> = tasksFiltred.map((t) => {
     return (
       <li key={t.id}>
-        <input
-          type="checkbox"
-          onChange={onChangeTaskStatusHandler}
-          checked={t.isDone}
+        <SuperCheckbox
+          isDone={t.isDone}
+          callBack={(isDone) => onChangeTaskStatusHandler(t.id, isDone)}
         />
         <EditableSpan
           oldTitle={t.title}
           onClickAdd={(newTitle: string) => updateTaskHandler(t.id, newTitle)}
         />
-        <button onClick={() => removeTask(todoListId, t.id)}>x</button>
+        <IconButton
+          onClick={() => removeTask(todoListId, t.id)}
+          aria-label="delete"
+        >
+          <DeleteIcon />
+        </IconButton>
       </li>
     );
   });
@@ -72,9 +80,6 @@ const TodoList: React.FC<TodoListPropsType> = ({
     <span>Your taskList is empty</span>
   );
 
-  // Функция принимает title и запускает функцию addTask, переданную из App.tsx,
-  // которая добаляет новый task в указанном todoListID
-  // Эту функцию мы передаем в AddItemForm
   const addTaskHandler = (title: string) => {
     addTask(todoListId, title);
   };
@@ -83,35 +88,40 @@ const TodoList: React.FC<TodoListPropsType> = ({
     updateTodoList(todoListId, newTitle);
   };
 
-  // Отрисовка TodoList
   const removeTodoListHandler = () => removeTodoList(todoListId);
+  // Отрисовка TodoList
   return (
     <div className="todoList">
       <h3>
         <EditableSpan oldTitle={title} onClickAdd={updateTodoListHandler} />
-        <button onClick={removeTodoListHandler}>x</button>
+        <IconButton onClick={removeTodoListHandler} aria-label="delete">
+          <DeleteIcon />
+        </IconButton>
       </h3>
       <AddItemForm onClickAdd={addTaskHandler} />
       {tasksList}
       <div>
-        <button
-          className={filter === "all" ? "btn-active" : undefined}
+        <Button
+          variant={filter === "all" ? "outlined" : "contained"}
+          color="success"
           onClick={() => changeFilter(todoListId, "all")}
         >
           All
-        </button>
-        <button
-          className={filter === "active" ? "btn-active" : undefined}
+        </Button>
+        <Button
+          variant={filter === "active" ? "outlined" : "contained"}
+          color="primary"
           onClick={() => changeFilter(todoListId, "active")}
         >
           Active
-        </button>
-        <button
-          className={filter === "completed" ? "btn-active" : undefined}
+        </Button>
+        <Button
+          variant={filter === "completed" ? "outlined" : "contained"}
+          color="secondary"
           onClick={() => changeFilter(todoListId, "completed")}
         >
           Completed
-        </button>
+        </Button>
       </div>
     </div>
   );

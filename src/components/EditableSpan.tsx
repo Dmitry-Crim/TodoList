@@ -1,5 +1,5 @@
 import React, { useState, type ChangeEvent } from "react";
-import "./App.css";
+// import "./App.css";
 
 type EditableSpanPropsType = {
   oldTitle: string;
