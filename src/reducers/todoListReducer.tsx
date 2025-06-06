@@ -1,6 +1,7 @@
+import type { Reducer } from "react";
 import type { FilterValuesType, TodoListType } from "../App";
 
-export const todoListReducer = (
+export const todoListReducer: Reducer<TodoListType[], TodoListReducerType> = (
   state: TodoListType[],
   action: TodoListReducerType
 ): TodoListType[] => {
@@ -25,7 +26,11 @@ export const todoListReducer = (
     case "ADD-TODOLIST": {
       return [
         ...state,
-        { id: action.payload.id, title: action.payload.title, filter: "all" },
+        {
+          id: action.payload.todoListId,
+          title: action.payload.title,
+          filter: "all",
+        },
       ];
     }
     default:
@@ -33,15 +38,15 @@ export const todoListReducer = (
   }
 };
 
-type TodoListReducerType =
+export type TodoListReducerType =
   | RemoveTodoListACType
   | UpdateTodoListACType
   | ChangeFilterACType
   | AddTodoListACType;
-type RemoveTodoListACType = ReturnType<typeof removeTodoListAC>;
-type UpdateTodoListACType = ReturnType<typeof updateTodoListAC>;
-type ChangeFilterACType = ReturnType<typeof changeFilterAC>;
-type AddTodoListACType = ReturnType<typeof addTodoListAC>;
+export type RemoveTodoListACType = ReturnType<typeof removeTodoListAC>;
+export type UpdateTodoListACType = ReturnType<typeof updateTodoListAC>;
+export type ChangeFilterACType = ReturnType<typeof changeFilterAC>;
+export type AddTodoListACType = ReturnType<typeof addTodoListAC>;
 
 export const removeTodoListAC = (todoListId: string) => {
   return {
@@ -72,12 +77,12 @@ export const changeFilterAC = (todoListId: string, value: FilterValuesType) => {
   } as const;
 };
 
-export const addTodoListAC = (title: string, id: string) => {
+export const addTodoListAC = (title: string) => {
   return {
     type: "ADD-TODOLIST",
     payload: {
       title,
-      id,
+      todoListId: crypto.randomUUID(),
     },
   } as const;
 };

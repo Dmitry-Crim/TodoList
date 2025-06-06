@@ -1,4 +1,7 @@
-import { useReducer } from "react";
+import {
+  // useEffect,
+  useReducer,
+} from "react";
 import "./App.css";
 import TodoList from "./components/TodoList";
 import { AddItemForm } from "./components/AddItemForm";
@@ -12,7 +15,6 @@ import {
   changeTaskStatusAC,
   removeTaskAC,
   updateTaskAC,
-  addTodoListTasksAC,
 } from "./reducers/tasksReducer";
 import {
   todoListReducer,
@@ -41,34 +43,33 @@ export type TaskType = {
 };
 
 function App() {
-  let todolistID1: string = crypto.randomUUID();
-  let todolistID2: string = crypto.randomUUID();
+  const todolistID1: string = crypto.randomUUID();
+  const todolistID2: string = crypto.randomUUID();
 
   // useReducer - React-хук для управления состояниями компонента
   // todoListReducer - функция, описывающая, как изменяются состояния
   // в ответ на определенные действия
   // todoLists - текущее состояние
   // dispatchTodoList - функция, отправляющая действие (action) редуктору
-  // и изменить состояние
 
-  let [todoLists, dispatchTodoList] = useReducer(todoListReducer, [
+  const [todoLists, dispatchTodoList] = useReducer(todoListReducer, [
     { id: todolistID1, title: "What to leaarn", filter: "all" },
     { id: todolistID2, title: "What to buy", filter: "all" },
   ]);
 
   const [tasks, dispatchTasks] = useReducer(tasksReducer, {
     [todolistID1]: [
-      { id: crypto.randomUUID(), title: "HTML&CSS", isDone: true },
+      { id: crypto.randomUUID(), title: "HTML&CSS", isDone: false },
       { id: crypto.randomUUID(), title: "JS", isDone: false },
-      { id: crypto.randomUUID(), title: "ReactJS", isDone: true },
+      { id: crypto.randomUUID(), title: "ReactJS", isDone: false },
       { id: crypto.randomUUID(), title: "Rest API", isDone: false },
-      { id: crypto.randomUUID(), title: "GraphQL", isDone: true },
+      { id: crypto.randomUUID(), title: "GraphQL", isDone: false },
     ],
     [todolistID2]: [
       { id: crypto.randomUUID(), title: "Яблоки", isDone: false },
-      { id: crypto.randomUUID(), title: "Груши", isDone: true },
+      { id: crypto.randomUUID(), title: "Груши", isDone: false },
       { id: crypto.randomUUID(), title: "Клубника", isDone: false },
-      { id: crypto.randomUUID(), title: "Мандарины", isDone: true },
+      { id: crypto.randomUUID(), title: "Мандарины", isDone: false },
       { id: crypto.randomUUID(), title: "Апельсины", isDone: false },
     ],
   });
@@ -108,9 +109,9 @@ function App() {
   };
 
   const addTodoList = (title: string) => {
-    const newTodolistId = crypto.randomUUID();
-    dispatchTodoList(addTodoListAC(title, newTodolistId));
-    dispatchTasks(addTodoListTasksAC(newTodolistId));
+    const action = addTodoListAC(title);
+    dispatchTasks(action);
+    dispatchTodoList(action);
   };
 
   // Отрисовка App
@@ -153,8 +154,33 @@ function App() {
           })}
         </Grid>
       </Container>
+      {/* <FunctionComp /> */}
     </div>
   );
 }
 
 export default App;
+
+// const FunctionComp = () => {
+//   const [size, setSize] = useState(10);
+
+// useLayoutEffect(() => {
+//   let start = new Date().getTime();
+//   let end = start;
+//   while (end < start + 3000) {
+//     end = new Date().getTime();
+//   }
+//   setSize(300);
+// });
+
+//   useEffect(() => {
+//     let start = new Date().getTime();
+//     let end = start;
+//     while (end < start + 1000) {
+//       end = new Date().getTime();
+//     }
+//     setSize(30);
+//   }, []);
+
+//   return <div style={{ fontSize: size }}>FunctionComp</div>;
+// };
