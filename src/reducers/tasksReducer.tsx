@@ -1,8 +1,17 @@
 import type { TasksType } from "../App";
 import type { AddTodoListACType } from "./todoListReducer";
 
+export type GeneralTasksType =
+  | RemoveTaskACType
+  | AddTaskACType
+  | ChangeTaskStatusACType
+  | UpdateTaskACType
+  | AddTodoListACType;
+
+const initialState: TasksType = {};
+
 export const tasksReducer = (
-  state: TasksType,
+  state = initialState,
   action: GeneralTasksType
 ): TasksType => {
   switch (action.type) {
@@ -56,13 +65,6 @@ export const tasksReducer = (
       return state;
   }
 };
-
-export type GeneralTasksType =
-  | RemoveTaskACType
-  | AddTaskACType
-  | ChangeTaskStatusACType
-  | UpdateTaskACType
-  | AddTodoListACType;
 
 export type RemoveTaskACType = ReturnType<typeof removeTaskAC>;
 export type AddTaskACType = ReturnType<typeof addTaskAC>;

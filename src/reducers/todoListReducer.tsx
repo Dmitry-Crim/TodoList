@@ -1,8 +1,16 @@
 import type { Reducer } from "react";
 import type { FilterValuesType, TodoListType } from "../App";
 
+export type TodoListReducerType =
+  | RemoveTodoListACType
+  | UpdateTodoListACType
+  | ChangeFilterACType
+  | AddTodoListACType;
+
+const initialState: TodoListType[] = [];
+
 export const todoListReducer: Reducer<TodoListType[], TodoListReducerType> = (
-  state: TodoListType[],
+  state = initialState,
   action: TodoListReducerType
 ): TodoListType[] => {
   switch (action.type) {
@@ -38,11 +46,6 @@ export const todoListReducer: Reducer<TodoListType[], TodoListReducerType> = (
   }
 };
 
-export type TodoListReducerType =
-  | RemoveTodoListACType
-  | UpdateTodoListACType
-  | ChangeFilterACType
-  | AddTodoListACType;
 export type RemoveTodoListACType = ReturnType<typeof removeTodoListAC>;
 export type UpdateTodoListACType = ReturnType<typeof updateTodoListAC>;
 export type ChangeFilterACType = ReturnType<typeof changeFilterAC>;
